@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2015, 2023 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0, which is available at
@@ -48,13 +48,15 @@ import javax.json.JsonValue.ValueType;
 public class JsonPatchImpl implements JsonPatch {
 
     private final JsonArray patch;
+    private final JsonContext jsonContext;
 
     /**
      * Constructs a JsonPatchImpl
      * @param patch the JSON Patch
      */
-    public JsonPatchImpl(JsonArray patch) {
+    public JsonPatchImpl(JsonArray patch, JsonContext jsonContext) {
         this.patch = patch;
+        this.jsonContext = jsonContext;
     }
 
     /**
@@ -126,8 +128,8 @@ public class JsonPatchImpl implements JsonPatch {
      * @param target the target, must be the same type as the source
      * @return a JSON Patch which when applied to the source, yields the target
      */
-    public static JsonArray diff(JsonStructure source, JsonStructure target) {
-        return (new DiffGenerator()).diff(source, target);
+    static JsonArray diff(JsonStructure source, JsonStructure target, JsonContext jsonContext) {
+        return (new DiffGenerator(jsonContext)).diff(source, target);
     }
 
     /**
@@ -182,7 +184,7 @@ public class JsonPatchImpl implements JsonPatch {
         if (pointerString == null) {
             missingMember(operation.getString("op"), member);
         }
-        return Json.createPointer(pointerString.getString());
+        return new JsonPointerImpl(pointerString.getString(), jsonContext);
     }
 
     private JsonValue getValue(JsonObject operation) {
@@ -199,9 +201,14 @@ public class JsonPatchImpl implements JsonPatch {
 
     static class DiffGenerator {
         private JsonPatchBuilder builder;
+        private final JsonContext jsonContext;
+
+        DiffGenerator(JsonContext jsonContext) {
+            this.jsonContext = jsonContext;
+        }
 
         JsonArray diff(JsonStructure source, JsonStructure target) {
-            builder = Json.createPatchBuilder();
+            builder = new JsonPatchBuilderImpl(jsonContext);
             diff("", source, target);
             return builder.build().toJsonArray();
         }

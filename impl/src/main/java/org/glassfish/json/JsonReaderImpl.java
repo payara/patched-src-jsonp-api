@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2013, 2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, 2023 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022 Contributors to the Eclipse Foundation. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0, which is available at
@@ -15,8 +16,6 @@
  */
 
 package org.glassfish.json;
-
-import org.glassfish.json.api.BufferPool;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -36,23 +35,20 @@ import javax.json.stream.JsonParsingException;
  * @author Jitendra Kotamraju
  */
 class JsonReaderImpl implements JsonReader {
+
     private final JsonParserImpl parser;
     private boolean readDone;
-    private final BufferPool bufferPool;
-
-    JsonReaderImpl(Reader reader, BufferPool bufferPool) {
-        parser = new JsonParserImpl(reader, bufferPool);
-        this.bufferPool = bufferPool;
+    
+    JsonReaderImpl(Reader reader, JsonContext jsonContext) {
+        parser = new JsonParserImpl(reader, jsonContext);
     }
 
-    JsonReaderImpl(InputStream in, BufferPool bufferPool) {
-        parser = new JsonParserImpl(in, bufferPool);
-        this.bufferPool = bufferPool;
+    JsonReaderImpl(InputStream in, JsonContext jsonContext) {
+        parser = new JsonParserImpl(in, jsonContext);
     }
 
-    JsonReaderImpl(InputStream in, Charset charset, BufferPool bufferPool) {
-        parser = new JsonParserImpl(in, charset, bufferPool);
-        this.bufferPool = bufferPool;
+    JsonReaderImpl(InputStream in, Charset charset, JsonContext jsonContext) {
+        parser = new JsonParserImpl(in, charset, jsonContext);
     }
 
     @Override

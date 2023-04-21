@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2023 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0, which is available at
@@ -119,9 +119,9 @@ final class JsonTokenizer implements Closeable {
         }
     }
 
-    JsonTokenizer(Reader reader, BufferPool bufferPool) {
+    JsonTokenizer(Reader reader, JsonContext jsonContext) {
         this.reader = reader;
-        this.bufferPool = bufferPool;
+        this.bufferPool = jsonContext.bufferPool();
         buf = bufferPool.take();
     }
 
