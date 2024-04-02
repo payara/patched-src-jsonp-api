@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2015, 2023 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0, which is available at
@@ -106,7 +106,7 @@ abstract class NodeReference {
      * @param structure the {@code JsonStructure} referenced
      * @return the {@code NodeReference}
      */
-    public static NodeReference of(JsonStructure structure) {
+    static NodeReference of(JsonStructure structure) {
         return new RootReference(structure);
     }
 
@@ -118,8 +118,8 @@ abstract class NodeReference {
      * @param name the name of the name/pair
      * @return the {@code NodeReference}
      */
-    public static NodeReference of(JsonObject object, String name) {
-        return new ObjectReference(object, name);
+    static NodeReference of(JsonObject object, String name, JsonContext jsonContext) {
+        return new ObjectReference(object, name, jsonContext);
     }
 
     /**
@@ -130,8 +130,8 @@ abstract class NodeReference {
      * @param index the index of the member value in the JSON array
      * @return the {@code NodeReference}
      */
-    public static NodeReference of(JsonArray array, int index) {
-        return new ArrayReference(array, index);
+    static NodeReference of(JsonArray array, int index, JsonContext jsonContext) {
+        return new ArrayReference(array, index, jsonContext);
     }
 
     static class RootReference extends NodeReference {
@@ -180,10 +180,12 @@ abstract class NodeReference {
 
         private final JsonObject object;
         private final String key;
+        private final JsonContext jsonContext;
 
-        ObjectReference(JsonObject object, String key) {
+        ObjectReference(JsonObject object, String key, JsonContext jsonContext) {
             this.object = object;
             this.key = key;
+            this.jsonContext = jsonContext;
         }
 
         @Override
@@ -201,7 +203,7 @@ abstract class NodeReference {
 
         @Override
         public JsonObject add(JsonValue value) {
-            return Json.createObjectBuilder(object).add(key, value).build();
+            return new JsonObjectBuilderImpl(object, jsonContext).add(key, value).build();
         }
 
         @Override
@@ -209,7 +211,7 @@ abstract class NodeReference {
             if (!contains()) {
                 throw new JsonException(JsonMessages.NODEREF_OBJECT_MISSING(key));
             }
-            return Json.createObjectBuilder(object).remove(key).build();
+            return new JsonObjectBuilderImpl(object, jsonContext).remove(key).build();
         }
 
         @Override
@@ -225,10 +227,12 @@ abstract class NodeReference {
 
         private final JsonArray array;
         private final int index; // -1 means "-" in JSON Pointer
+        private final JsonContext jsonContext;
 
-        ArrayReference(JsonArray array, int index) {
+        ArrayReference(JsonArray array, int index, JsonContext jsonContext) {
             this.array = array;
             this.index = index;
+            this.jsonContext = jsonContext;
         }
 
         @Override
@@ -248,7 +252,7 @@ abstract class NodeReference {
         public JsonArray add(JsonValue value) {
             //TODO should we check for arrayoutofbounds?
             // The spec seems to say index = array.size() is allowed. This is handled as append
-            JsonArrayBuilder builder = Json.createArrayBuilder(this.array);
+            JsonArrayBuilder builder = new JsonArrayBuilderImpl(this.array, jsonContext);
             if (index == -1 || index == array.size()) {
                 builder.add(value);
             } else {
@@ -266,7 +270,7 @@ abstract class NodeReference {
             if (!contains()) {
                 throw new JsonException(JsonMessages.NODEREF_ARRAY_INDEX_ERR(index, array.size()));
             }
-            JsonArrayBuilder builder = Json.createArrayBuilder(this.array);
+            JsonArrayBuilder builder = new JsonArrayBuilderImpl(this.array, jsonContext);
             return builder.remove(index).build();
         }
 
@@ -275,7 +279,7 @@ abstract class NodeReference {
             if (!contains()) {
                 throw new JsonException(JsonMessages.NODEREF_ARRAY_INDEX_ERR(index, array.size()));
             }
-            JsonArrayBuilder builder = Json.createArrayBuilder(this.array);
+            JsonArrayBuilder builder = new JsonArrayBuilderImpl(this.array, jsonContext);
             return builder.set(index, value).build();
         }
     }

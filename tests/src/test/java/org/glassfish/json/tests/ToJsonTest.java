@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2015, 2023 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0, which is available at
@@ -23,7 +23,7 @@ import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonValue;
 
-import org.glassfish.json.JsonUtil;
+import org.glassfish.json.TestUtils;
 
 import static org.junit.Assert.assertEquals;
 /**
@@ -33,9 +33,9 @@ public class ToJsonTest {
 
     @Test
     public void testToJson() {
-        assertEquals(Json.createValue("someString"), JsonUtil.toJson("'someString'"));
-        assertEquals(Json.createValue("some'thing"), JsonUtil.toJson("'some\\'thing'"));
-        assertEquals(Json.createValue("some\"thing"), JsonUtil.toJson("'some\\\"thing'"));
+        assertEquals(Json.createValue("someString"), TestUtils.toJson("'someString'"));
+        assertEquals(Json.createValue("some'thing"), TestUtils.toJson("'some\\'thing'"));
+        assertEquals(Json.createValue("some\"thing"), TestUtils.toJson("'some\\\"thing'"));
         JsonArrayBuilder builder = Json.createArrayBuilder();
         JsonArray array = builder
             .add(Json.createObjectBuilder()
@@ -49,7 +49,7 @@ public class ToJsonTest {
                 .add("educations", Json.createArrayBuilder()
                     .add("Oxford")))
             .build();
-         JsonValue expected = JsonUtil.toJson(
+         JsonValue expected = TestUtils.toJson(
              "[ { 'name': 'John', " +
                  "'age': 35, " +
                  "'educations': ['Gunn High', 'UC Berkeley'] }, " +
